@@ -1,0 +1,7 @@
+= OpenShift CICD Workshop
+
+This repository contains the source code for the OpenShift CICD Workshop.
+
+This workshop is split into the following sections:
+
+* link:01.Application-Build/README.adoc[Application Build]
