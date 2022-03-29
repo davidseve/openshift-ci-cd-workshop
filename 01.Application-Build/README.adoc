@@ -82,7 +82,7 @@ Eventually, you will want to remove old tags from your Image Stream, and yet aga
 ```sh
 $ oc tag -d python:3.8
 ```
-== Build
+== Build Strategies - Docker
 
 ===  Simple Docker build
 
@@ -119,4 +119,51 @@ spec:
       kind: ImageStreamTag
       name: 'simple-docker-build:latest'
 EOF
+```
+== Build Strategies - S2I
+
+Source-to-Image (S2I) is a toolkit and workflow for building reproducible container images from source code. S2I produces ready-to-run images by injecting source code into a container image and letting the container prepare that source code for execution. By creating self-assembling builder images, you can version and control your build environments exactly like you use container images to version your runtime environments.
+
+NOTE: You will need to https://github.com/openshift/source-to-image/releases/latest/[install s2i binary] to use prior to completing any of the following tasks.
+
+```sh
+$ s2i build https://github.com/spring-projects/spring-petclinic.git registry.access.redhat.com/ubi8/openjdk-11 spring-boot-pet
+$ docker run -p 8080:8080 spring-boot-pet
+```
+
+=== Building an Application From Existing Binary
+
+```sh
+# building the jar
+$ git clone https://github.com/spring-projects/spring-petclinic.git
+$ cd spring-petclinic
+$ podman run -ti --rm --user 0 -v $(pwd):/work:Z registry.redhat.io/ubi8/openjdk-11 bash
+cd /work
+mvn package
+exit
+# alternatively if you have mvn install can run mvn package instead
+```
+
+```sh
+# create the build
+$ oc new-build java --name=java-binary-build --binary=true
+$ oc start-build bc/java-binary-build \
+    --from-file=./target/*.jar \
+    --follow
+```
+
+=== Building Your Applications From Source Code
+
+```sh
+# oc new-build <builder-image>~<git-repository> --name=<optional>
+$ oc new-build registry.redhat.io/ubi8/openjdk-11~https://github.com/spring-projects/spring-petclinic.git --name=spring-boot-pet
+```
+
+== Using oc new-app
+
+The new-app command creates a build configuration, which itself creates a new application image from your source code. The new-app command typically also creates a Deployment object to deploy the new image, and a service to provide load-balanced access to the deployment running your image.
+
+```sh
+# oc new-app <builder-image>~<git-repository> --name=<optional>
+$ oc new-app registry.redhat.io/ubi8/openjdk-11~https://github.com/spring-projects/spring-petclinic.git --name=spring-boot-pet
 ```
