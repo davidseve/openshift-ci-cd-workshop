@@ -82,3 +82,41 @@ Eventually, you will want to remove old tags from your Image Stream, and yet aga
 ```sh
 $ oc tag -d python:3.8
 ```
+== Build
+
+===  Simple Docker build
+
+```sh
+$ oc apply -f - <<EOF
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: simple-docker-build
+spec:
+  lookupPolicy:
+    local: false
+EOF
+---
+oc apply -f - <<EOF
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: simple-docker-build
+  labels:
+    name: simple-docker-build
+spec:
+  triggers:
+    - type: ConfigChange
+  source:
+    contextDir: "01.Application-Build/simple-docker-build/"
+    type: Git
+    git:
+      uri: 'https://github.com/cmcornejocrespo/openshift-ci-cd-workshop.git'
+  strategy:
+    type: Docker
+  output:
+    to:
+      kind: ImageStreamTag
+      name: 'simple-docker-build:latest'
+EOF
+```
