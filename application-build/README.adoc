@@ -1,0 +1,84 @@
+= Application Build
+
+== Image Streams
+
+===  How Do I Create An Image Stream From An Existing Image?
+
+To create a new Image Stream named “python” with a single tag pointing to 3.9, invoke following command:
+
+NOTE: You will need to https://access.redhat.com/terms-based-registry/[create a registry service account] to use prior to completing any of the following tasks.
+
+```sh
+$ oc import-image python:3.8 --from=registry.redhat.io/ubi8/python-38:1-86.1648121386 --confirm
+```
+
+What did do, let's break this command into pieces:
+
+* `python:3.8` - python is the new Image Stream that will be created as a result of this invocation. Additionally we are explicitly pointing that the imported image will be kept under the 3.8 Image Stream Tag of that Image Stream. If no tag part is specified the command will use latest.
+
+* `--from=registry.redhat.io/ubi8/python-38:1-86.1648121386` - states what external image the Image Stream Tag will point to.
+
+* `--confirm` - informs the system that the python Image Stream should be created.
+
+===  How Do I Get Information About Image Streams?
+
+`oc describe` is the universal way of getting a user-readable information about any object in the OpenShift cluster. This will give you general information about the Image Stream and detailed information about all the tags it is pointing to. In our example we would invoke:
+
+```sh
+$ oc describe is/python
+```
+to get all the information available about entire Image Stream,
+```sh
+$ oc describe istag/python:3.8
+```
+to get all the information available about particular Image Stream Tag.
+
+===  How Do I Add More Tags To The Current Image Stream?
+
+To add a _latest_ tag that points to one of the existing tags, you can use the `oc tag` command:
+
+```sh
+$ oc tag python:3.8 python:latest
+```
+
+Examining the _python_ ImageStream with `oc describe` should assure us that we have exactly two tags, one (_3.5_) pointing at the external docker image and another one (_latest_) pointing to a different tag in the same Image Stream.
+
+===  How Do I Add A Tag Pointing To An External Image?
+
+All tag-related operations are performed using `oc tag` command, and adding tags pointing to internal or external images is not any different:
+
+```sh
+$ oc tag registry.access.redhat.com/ubi8/python-39:1-35.1648121362 python:3.9
+```
+
+This command maps the registry.access.redhat.com/ubi8/python-39:1-35.1648121362 image to the 3.9 tag in our python Image Stream.
+
+===  How Do I Update The Current Tag?
+
+We have just updated our Image Stream with a new tag and now we want to update the `latest` tag to reflect the newer 3.9 tag in our Image Stream. Not surprisingly, we are going to use `oc tag` once again:
+
+```sh
+$ oc tag python:3.9 python:latest
+```
+
+===  How Can I Tell The System To Periodically Import My Tag?
+
+When we are working with an external registry, we would like to be able to periodically re-import the image to get latest security updates, etc. To do so we will use a `--scheduled` flag for the `oc tag` command like so:
+
+```sh
+$ oc tag registry.access.redhat.com/ubi8/python-39:1-35.1648121362 python:3.9 --scheduled
+```
+
+This will inform the system that this particular Image Stream Tag should be periodically checked for updates. Currently, this period is a cluster-wide setting, and by default, it is set to 15 minutes.
+
+Only an Image Stream Tag pointing to an external docker registry can be periodically checked for updates.
+
+To remove the periodical check, re-run above command but omit the --scheduled flag. This will reset its behavior to default.
+
+===  How Do I Remove A Tag From An Image Stream?
+
+Eventually, you will want to remove old tags from your Image Stream, and yet again we are going to use `oc tag` for that particular use case:
+
+```sh
+$ oc tag -d python:3.8
+```
