@@ -7,3 +7,4 @@ This workshop is split into the following sections:
 * link:01.Application-Build/README.adoc[Application Build]
 * link:02.Application-Deployment/README.adoc[Application Deployment]
 * link:03.OpenShift-Pipelines/README.adoc[OpenShift Pipelines]
+* link:04.OpenShift-GitOps/README.adoc[OpenShift GitOps]
