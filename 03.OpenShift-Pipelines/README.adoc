@@ -485,7 +485,7 @@ parameters declared in the pipeline:
 ```shell
 tkn pipeline start count-workspace-pipeline \
     --param GIT_URL=https://github.com/spring-projects/spring-petclinic.git \
-    --param GIT_REVISION=master \
+    --param GIT_REVISION=main \
     --workspace name=workspace,claimName=workspace-pvc \
     --showlog
 ```
