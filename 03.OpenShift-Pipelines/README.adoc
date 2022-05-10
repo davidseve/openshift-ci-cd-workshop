@@ -267,7 +267,7 @@ spec:
 ```
 
 ```shell
-oc apply -f pipelines/04-say-things-pipelinerun.yaml
+oc apply -f pipeline/04-say-things-pipelinerun.yaml
 ```
 
 OpenShift has a dashboard to check and review the current status of the `Pipeline` and `PipelineRun` from
